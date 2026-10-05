@@ -1,0 +1,98 @@
+root = true
+
+[*]
+charset = utf-8
+end_of_line = lf
+insert_final_newline = true
+indent_style = space
+indent_size = 4
+trim_trailing_whitespace = true
+
+[*.cs]
+csharp_new_line_before_open_brace = all
+csharp_indent_case_contents = true
+csharp_indent_switch_labels = true
+csharp_style_namespace_declarations = block_scoped:suggestion
+dotnet_sort_system_directives_first = true
+
+# Naming diagnostics are IDE suggestions, not Unity compilation errors.
+# Types and namespaces: BlackHoleController, UpgradeData, Game.Client
+dotnet_naming_rule.types_and_namespaces.symbols = types_and_namespaces
+dotnet_naming_rule.types_and_namespaces.style = pascal_case
+dotnet_naming_rule.types_and_namespaces.severity = suggestion
+dotnet_naming_symbols.types_and_namespaces.applicable_kinds = namespace, class, struct, enum, delegate
+
+# Interfaces: ICollectable
+dotnet_naming_rule.interfaces.symbols = interfaces
+dotnet_naming_rule.interfaces.style = interface_pascal_case
+dotnet_naming_rule.interfaces.severity = suggestion
+dotnet_naming_symbols.interfaces.applicable_kinds = interface
+
+# Generic type parameters: T, TItem
+dotnet_naming_rule.type_parameters.symbols = type_parameters
+dotnet_naming_rule.type_parameters.style = type_parameter_pascal_case
+dotnet_naming_rule.type_parameters.severity = suggestion
+dotnet_naming_symbols.type_parameters.applicable_kinds = type_parameter
+
+# Methods (including Unity messages), properties and events: Awake, Mass, MassChanged
+dotnet_naming_rule.members.symbols = members
+dotnet_naming_rule.members.style = pascal_case
+dotnet_naming_rule.members.severity = suggestion
+dotnet_naming_symbols.members.applicable_kinds = method, property, event, local_function
+
+# Parameters and locals: deltaTime, collectedMass
+dotnet_naming_rule.parameters_and_locals.symbols = parameters_and_locals
+dotnet_naming_rule.parameters_and_locals.style = camel_case
+dotnet_naming_rule.parameters_and_locals.severity = suggestion
+dotnet_naming_symbols.parameters_and_locals.applicable_kinds = parameter, local
+
+# Public/protected fields and enum members: MaxMass, Idle
+dotnet_naming_rule.fields.symbols = fields
+dotnet_naming_rule.fields.style = pascal_case
+dotnet_naming_rule.fields.severity = suggestion
+dotnet_naming_symbols.fields.applicable_kinds = field
+
+# Private/internal fields: _mass (also static, readonly and [SerializeField]).
+# Attribute-based selection is not supported by standard .NET naming rules.
+dotnet_naming_rule.private_internal_fields.symbols = private_internal_fields
+dotnet_naming_rule.private_internal_fields.style = underscore_camel_case
+dotnet_naming_rule.private_internal_fields.severity = suggestion
+dotnet_naming_symbols.private_internal_fields.applicable_kinds = field
+dotnet_naming_symbols.private_internal_fields.applicable_accessibilities = private, internal, private_protected
+
+# Constants use PascalCase at every accessibility, including local constants.
+dotnet_naming_rule.constants.symbols = constants
+dotnet_naming_rule.constants.style = pascal_case
+dotnet_naming_rule.constants.severity = suggestion
+dotnet_naming_symbols.constants.applicable_kinds = field, local
+dotnet_naming_symbols.constants.required_modifiers = const
+
+# Explicit intersection prevents private field rules from winning over constants.
+dotnet_naming_rule.private_internal_constants.symbols = private_internal_constants
+dotnet_naming_rule.private_internal_constants.style = pascal_case
+dotnet_naming_rule.private_internal_constants.severity = suggestion
+dotnet_naming_symbols.private_internal_constants.applicable_kinds = field
+dotnet_naming_symbols.private_internal_constants.applicable_accessibilities = private, internal, private_protected
+dotnet_naming_symbols.private_internal_constants.required_modifiers = const
+
+# Shared naming styles
+dotnet_naming_style.pascal_case.capitalization = pascal_case
+dotnet_naming_style.camel_case.capitalization = camel_case
+dotnet_naming_style.underscore_camel_case.capitalization = camel_case
+dotnet_naming_style.underscore_camel_case.required_prefix = _
+dotnet_naming_style.interface_pascal_case.capitalization = pascal_case
+dotnet_naming_style.interface_pascal_case.required_prefix = I
+dotnet_naming_style.type_parameter_pascal_case.capitalization = pascal_case
+dotnet_naming_style.type_parameter_pascal_case.required_prefix = T
+
+[*.{json,asmdef,asmref,yml,yaml}]
+indent_size = 2
+
+[*.md]
+trim_trailing_whitespace = false
+
+# Unity owns serialization; avoid whitespace-only asset rewrites.
+[*.{unity,prefab,asset,meta,mat,anim,controller,overrideController,mixer,playable,scenetemplate,inputactions,shadergraph,shadersubgraph}]
+indent_size = unset
+trim_trailing_whitespace = false
+insert_final_newline = unset

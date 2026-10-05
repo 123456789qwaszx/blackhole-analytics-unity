@@ -112,3 +112,31 @@ InitTestScene*.unity*
 
 # Auto-generated cache in Assets folder
 /[Aa]ssets/[Ss]ceneDependencyCache*
+
+# OS-generated files
+.DS_Store
+._*
+Thumbs.db
+Thumbs.db:encryptable
+Desktop.ini
+$RECYCLE.BIN/
+
+# IDE-local caches and workspace state
+.idea/
+*.sln.iml
+*.code-workspace
+*.swp
+*.swo
+*~
+
+# Visual Studio configuration and VS Code workspace files
+.vsconfig
+.vscode/
+
+# Local environment configuration (commit examples without credentials)
+.env
+.env.*
+!.env.example
+
+# Cowork(Claude)가 미리보기 이미지를 저장하는 폴더
+/Claude outputs/
