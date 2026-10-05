@@ -63,8 +63,8 @@ namespace BlackHole.Analytics.Tests
         [Test]
         public void DeliveredIsRemoved()
         {
-            _queue.Enqueue(AnalyticsQueueTests.Stats("a"));
-            _queue.Enqueue(AnalyticsQueueTests.Stats("b"));
+            _queue.Enqueue(AnalyticsQueueTests.Summary("a"));
+            _queue.Enqueue(AnalyticsQueueTests.Summary("b"));
             var client = new FakeClient(Answer(201), Answer(200));
 
             RunToEnd(new AnalyticsSender(_queue, client).FlushAsync());
@@ -77,12 +77,12 @@ namespace BlackHole.Analytics.Tests
         [Test]
         public void SendAsyncPostsQueuedJson()
         {
-            BattleStatsDto stats = AnalyticsQueueTests.Stats("a");
+            BattleSummaryDto summary = AnalyticsQueueTests.Summary("a");
             var client = new FakeClient(Answer(201));
 
-            RunToEnd(new AnalyticsSender(_queue, client).SendAsync(stats));
+            RunToEnd(new AnalyticsSender(_queue, client).SendAsync(summary));
 
-            Assert.AreEqual(JsonUtility.ToJson(stats), client.Posted[0]);
+            Assert.AreEqual(JsonUtility.ToJson(summary), client.Posted[0]);
             Assert.AreEqual(0, _queue.Count);
         }
 
@@ -90,8 +90,8 @@ namespace BlackHole.Analytics.Tests
         [Test]
         public void RejectedIsMovedAsideAndNextIsSent()
         {
-            _queue.Enqueue(AnalyticsQueueTests.Stats("a"));
-            _queue.Enqueue(AnalyticsQueueTests.Stats("b"));
+            _queue.Enqueue(AnalyticsQueueTests.Summary("a"));
+            _queue.Enqueue(AnalyticsQueueTests.Summary("b"));
             var client = new FakeClient(Answer(422, JsonSamples.Load(JsonSamples.ErrorResponse)), Answer(201));
 
             LogAssert.Expect(LogType.Error, new Regex("rejected/로 옮겼다 - HTTP 422 INVALID_FIELD \\(.*-a\\.json\\)\n\\{"));
@@ -106,7 +106,7 @@ namespace BlackHole.Analytics.Tests
         [Test]
         public void RejectedWithUnreadableBodyIsMovedAside()
         {
-            _queue.Enqueue(AnalyticsQueueTests.Stats("a"));
+            _queue.Enqueue(AnalyticsQueueTests.Summary("a"));
             var client = new FakeClient(Answer(400, "<html>Bad Request</html>"));
 
             LogAssert.Expect(LogType.Error, new Regex("rejected/로 옮겼다 - HTTP 400 \\(.*\\)\n<html>"));
@@ -128,8 +128,8 @@ namespace BlackHole.Analytics.Tests
         [TestCase(302, LogType.Error)]
         public void HaltedKeepsEveryItem(int statusCode, LogType logType)
         {
-            _queue.Enqueue(AnalyticsQueueTests.Stats("a"));
-            _queue.Enqueue(AnalyticsQueueTests.Stats("b"));
+            _queue.Enqueue(AnalyticsQueueTests.Summary("a"));
+            _queue.Enqueue(AnalyticsQueueTests.Summary("b"));
             var client = new FakeClient(Answer(statusCode));
 
             LogAssert.Expect(logType, new Regex($"큐에 두었다 - HTTP {statusCode} \\("));
@@ -144,7 +144,7 @@ namespace BlackHole.Analytics.Tests
         [Test]
         public void NetworkErrorKeepsItem()
         {
-            _queue.Enqueue(AnalyticsQueueTests.Stats("a"));
+            _queue.Enqueue(AnalyticsQueueTests.Summary("a"));
             var client = new FakeClient(AnalyticsResponse.Network("Cannot connect to destination host"));
 
             LogAssert.Expect(LogType.Log, new Regex("큐에 두었다 - 닿지 않음: Cannot connect"));
@@ -163,12 +163,12 @@ namespace BlackHole.Analytics.Tests
 
             try
             {
-                _queue.Enqueue(AnalyticsQueueTests.Stats("a"));
+                _queue.Enqueue(AnalyticsQueueTests.Summary("a"));
                 var client = new PendingClient();
                 var sender = new AnalyticsSender(_queue, client);
 
                 Task first = sender.FlushAsync();
-                Task second = sender.SendAsync(AnalyticsQueueTests.Stats("b"));
+                Task second = sender.SendAsync(AnalyticsQueueTests.Summary("b"));
 
                 Assert.AreSame(first, second);
                 Assert.IsFalse(first.IsCompleted);
@@ -192,7 +192,7 @@ namespace BlackHole.Analytics.Tests
         [Test]
         public void UnexpectedExceptionIsLoggedAndItemKept()
         {
-            _queue.Enqueue(AnalyticsQueueTests.Stats("a"));
+            _queue.Enqueue(AnalyticsQueueTests.Summary("a"));
             var client = new ThrowingClient(new InvalidOperationException("잘못된 주소"));
 
             LogAssert.Expect(LogType.Error, new Regex("보내다 멈췄다: System.InvalidOperationException: 잘못된 주소"));
@@ -205,7 +205,7 @@ namespace BlackHole.Analytics.Tests
         [Test]
         public void EnqueueFailureStillFlushes()
         {
-            _queue.Enqueue(AnalyticsQueueTests.Stats("a"));
+            _queue.Enqueue(AnalyticsQueueTests.Summary("a"));
             var client = new FakeClient(Answer(201));
 
             LogAssert.Expect(LogType.Error, new Regex("큐에 넣지 못했다"));
@@ -237,7 +237,7 @@ namespace BlackHole.Analytics.Tests
                 _responses = new Queue<AnalyticsResponse>(responses);
             }
 
-            public Task<AnalyticsResponse> PostBattleStatsAsync(string json)
+            public Task<AnalyticsResponse> PostBattleSummaryAsync(string json)
             {
                 Posted.Add(json);
                 return Task.FromResult(_responses.Dequeue());
@@ -251,7 +251,7 @@ namespace BlackHole.Analytics.Tests
 
             public List<string> Posted { get; } = new();
 
-            public Task<AnalyticsResponse> PostBattleStatsAsync(string json)
+            public Task<AnalyticsResponse> PostBattleSummaryAsync(string json)
             {
                 Posted.Add(json);
                 _pending = new TaskCompletionSource<AnalyticsResponse>();
@@ -270,7 +270,7 @@ namespace BlackHole.Analytics.Tests
                 _error = error;
             }
 
-            public Task<AnalyticsResponse> PostBattleStatsAsync(string json) => throw _error;
+            public Task<AnalyticsResponse> PostBattleSummaryAsync(string json) => throw _error;
         }
     }
 }

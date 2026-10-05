@@ -35,11 +35,11 @@ namespace BlackHole.Analytics.Transport
         }
 
         // 큐에 넣고 보낸다. 넣지 못해도(저장 공간 부족 등) 이 판의 통계만 잃고, 쌓여 있던 통계는 보낸다.
-        public Task SendAsync(BattleStatsDto stats)
+        public Task SendAsync(BattleSummaryDto summary)
         {
             try
             {
-                _queue.Enqueue(stats);
+                _queue.Enqueue(summary);
             }
             catch (Exception error)
             {
@@ -78,7 +78,7 @@ namespace BlackHole.Analytics.Transport
             {
                 while (_queue.TryPeek(out AnalyticsQueue.Item item))
                 {
-                    AnalyticsResponse response = await _client.PostBattleStatsAsync(item.Json);
+                    AnalyticsResponse response = await _client.PostBattleSummaryAsync(item.Json);
 
                     switch (Classify(response))
                     {

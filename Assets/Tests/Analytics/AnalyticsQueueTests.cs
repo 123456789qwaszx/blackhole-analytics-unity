@@ -28,8 +28,8 @@ namespace BlackHole.Analytics.Tests
         public void ItemsComeOutInEnqueueOrder()
         {
             var queue = new AnalyticsQueue(_directory, 10);
-            queue.Enqueue(Stats("b"));
-            queue.Enqueue(Stats("a"));
+            queue.Enqueue(Summary("b"));
+            queue.Enqueue(Summary("a"));
 
             Assert.AreEqual("b", BattleIdOf(Dequeue(queue)));
             Assert.AreEqual("a", BattleIdOf(Dequeue(queue)));
@@ -41,18 +41,18 @@ namespace BlackHole.Analytics.Tests
         public void ItemKeepsJsonAsWritten()
         {
             var queue = new AnalyticsQueue(_directory, 10);
-            BattleStatsDto stats = Stats("a");
-            queue.Enqueue(stats);
+            BattleSummaryDto summary = Summary("a");
+            queue.Enqueue(summary);
 
             Assert.IsTrue(queue.TryPeek(out AnalyticsQueue.Item item));
-            Assert.AreEqual(JsonUtility.ToJson(stats), item.Json);
+            Assert.AreEqual(JsonUtility.ToJson(summary), item.Json);
         }
 
         // 앱을 다시 켜도(새 큐) 남아 있다. 쓰다 만 파일은 버린다.
         [Test]
         public void ItemsSurviveRestartAndPartialFilesAreDropped()
         {
-            new AnalyticsQueue(_directory, 10).Enqueue(Stats("a"));
+            new AnalyticsQueue(_directory, 10).Enqueue(Summary("a"));
             File.WriteAllText(Path.Combine(_directory, "20260101000000000000000-x.json.tmp"), "{");
 
             var reopened = new AnalyticsQueue(_directory, 10);
@@ -66,11 +66,11 @@ namespace BlackHole.Analytics.Tests
         public void OldestIsDroppedWhenFull()
         {
             var queue = new AnalyticsQueue(_directory, 2);
-            queue.Enqueue(Stats("1"));
-            queue.Enqueue(Stats("2"));
+            queue.Enqueue(Summary("1"));
+            queue.Enqueue(Summary("2"));
 
             LogAssert.Expect(LogType.Warning, new Regex("가장 오래된 통계를 버렸다: .*-1\\.json"));
-            queue.Enqueue(Stats("3"));
+            queue.Enqueue(Summary("3"));
 
             Assert.AreEqual(2, queue.Count);
             Assert.AreEqual("2", BattleIdOf(Dequeue(queue)));
@@ -81,8 +81,8 @@ namespace BlackHole.Analytics.Tests
         public void RejectedItemIsMovedAside()
         {
             var queue = new AnalyticsQueue(_directory, 10);
-            queue.Enqueue(Stats("a"));
-            queue.Enqueue(Stats("b"));
+            queue.Enqueue(Summary("a"));
+            queue.Enqueue(Summary("b"));
 
             Assert.IsTrue(queue.TryPeek(out AnalyticsQueue.Item rejected));
             queue.Reject(rejected);
@@ -97,9 +97,9 @@ namespace BlackHole.Analytics.Tests
         public void OldestRejectedIsDroppedWhenFull()
         {
             var queue = new AnalyticsQueue(_directory, 1);
-            queue.Enqueue(Stats("1"));
+            queue.Enqueue(Summary("1"));
             queue.Reject(Peek(queue));
-            queue.Enqueue(Stats("2"));
+            queue.Enqueue(Summary("2"));
 
             LogAssert.Expect(LogType.Warning, new Regex("격리 폴더가 가득 차\\(1개\\) 가장 오래된 통계를 버렸다: .*-1\\.json"));
             queue.Reject(Peek(queue));
@@ -109,8 +109,8 @@ namespace BlackHole.Analytics.Tests
             StringAssert.EndsWith("-2.json", rejected[0]);
         }
 
-        internal static BattleStatsDto Stats(string battleId) =>
-            new BattleStatsDto { battleId = battleId };
+        internal static BattleSummaryDto Summary(string battleId) =>
+            new BattleSummaryDto { battleId = battleId };
 
         private static AnalyticsQueue.Item Peek(AnalyticsQueue queue)
         {
@@ -126,6 +126,6 @@ namespace BlackHole.Analytics.Tests
         }
 
         private static string BattleIdOf(AnalyticsQueue.Item item) =>
-            JsonUtility.FromJson<BattleStatsDto>(item.Json).battleId;
+            JsonUtility.FromJson<BattleSummaryDto>(item.Json).battleId;
     }
 }

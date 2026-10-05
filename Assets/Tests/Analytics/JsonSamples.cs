@@ -8,7 +8,7 @@ namespace BlackHole.Analytics.Tests
     // 계약 예시 JSON을 읽고 견주는 도구.
     internal static class JsonSamples
     {
-        public const string BattleStats = "Assets/Scripts/Analytics/battle-stats.sample.json";
+        public const string BattleSummary = "Assets/Scripts/Analytics/battle-summary.sample.json";
         public const string ErrorResponse = "Assets/Scripts/Analytics/Transport/error-response.sample.json";
 
         public static string Load(string path)

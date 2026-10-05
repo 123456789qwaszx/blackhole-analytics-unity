@@ -39,14 +39,14 @@ namespace BlackHole.Analytics.Transport
 
         public int Count => Files(_directory).Length;
 
-        public void Enqueue(BattleStatsDto stats)
+        public void Enqueue(BattleSummaryDto summary)
         {
             _lastTicks = Math.Max(DateTime.UtcNow.Ticks, _lastTicks + 1);
             string stamp = new DateTime(_lastTicks, DateTimeKind.Utc).ToString("yyyyMMddHHmmssfffffff", CultureInfo.InvariantCulture);
-            string path = Path.Combine(_directory, $"{stamp}-{stats.battleId}{Extension}");
+            string path = Path.Combine(_directory, $"{stamp}-{summary.battleId}{Extension}");
             string temp = path + TempExtension;
 
-            File.WriteAllText(temp, JsonUtility.ToJson(stats), Utf8);
+            File.WriteAllText(temp, JsonUtility.ToJson(summary), Utf8);
             File.Move(temp, path);
 
             DropOverflow(_directory, "큐");

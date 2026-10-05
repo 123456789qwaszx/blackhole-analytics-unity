@@ -1,6 +1,8 @@
 {
   "schemaVersion": 1,
   "battleId": "3f2b8c1e-9a4d-4e6f-8b7a-1c2d3e4f5a6b",
+  "installId": "9c1e4b2a-7d3f-4a8e-b5c6-2f1d0e9a8b7c",
+  "battleIndex": 27,
   "buildVersion": "1.0",
   "contentVersion": "",
   "startedAtUtc": "2026-10-05T03:00:00.0000000Z",
