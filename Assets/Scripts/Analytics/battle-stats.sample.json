@@ -1,0 +1,26 @@
+{
+  "schemaVersion": 1,
+  "battleId": "3f2b8c1e-9a4d-4e6f-8b7a-1c2d3e4f5a6b",
+  "buildVersion": "1.0",
+  "contentVersion": "",
+  "startedAtUtc": "2026-10-05T03:00:00.0000000Z",
+  "endedAtUtc": "2026-10-05T03:02:30.0000000Z",
+  "playedSeconds": 92.5,
+  "startGrowthStage": 3,
+  "nodes": [
+    { "nodeId": "timer-01", "rank": 1 },
+    { "nodeId": "growth.time-01", "rank": 1 },
+    { "nodeId": "electricAsteroid.spawnChance-01", "rank": 1 },
+    { "nodeId": "star.size-03", "rank": 3 }
+  ],
+  "kills": [
+    { "enemyId": "asteroid", "count": 128 },
+    { "enemyId": "comet", "count": 17 },
+    { "enemyId": "planet", "count": 4 }
+  ],
+  "totalKills": 149,
+  "earnedGold": 1840,
+  "settledGold": 1840,
+  "reachedLevel": 12,
+  "reachedMilestone": false
+}
