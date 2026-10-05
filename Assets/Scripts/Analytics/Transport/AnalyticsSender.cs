@@ -1,6 +1,5 @@
 using System;
 using System.IO;
-using System.Linq;
 using System.Threading.Tasks;
 using UnityEngine;
 
@@ -11,7 +10,7 @@ namespace BlackHole.Analytics.Transport
     // 응답에 따라(Classify):
     // - 2xx: 보냈다. 처음 받으면 201, 이미 받은 판이면 200이다. 큐에서 지운다.
     // - 400·413·422: 요청 내용 탓이라 다시 보내도 같다. 에러를 남기고 버린다.
-    // - 그 밖(응답 없음, 404, 429, 5xx 등): 큐에 두고 이번 보내기를 멈춘다. 서버 주소가 틀려도 통계를 잃지 않는다.
+    // - 그 밖(닿지 않음, 404, 429, 5xx 등): 큐에 두고 이번 보내기를 멈춘다. 서버 주소가 틀려도 통계를 잃지 않는다.
     public sealed class AnalyticsSender
     {
         public enum Outcome
@@ -59,16 +58,16 @@ namespace BlackHole.Analytics.Transport
                 while (_queue.TryPeek(out AnalyticsQueue.Item item))
                 {
                     AnalyticsResponse response = await _client.PostBattleStatsAsync(item.Json);
-                    Outcome outcome = Classify(response.StatusCode);
+                    Outcome outcome = Classify(response);
 
                     if (outcome == Outcome.Retry)
                     {
-                        Debug.LogWarning($"[통계] 보내지 못해 큐에 두었다({Describe(response)}): {item.Name}");
+                        Debug.LogWarning($"[통계] 보내지 못해 큐에 두었다 - {Describe(response)} ({item.Name})");
                         return;
                     }
 
                     if (outcome == Outcome.Rejected)
-                        Debug.LogError($"[통계] 서버가 받지 않아 버렸다({Describe(response)}): {item.Name}");
+                        Debug.LogError($"[통계] 서버가 받지 않아 버렸다 - {Describe(response)} ({item.Name})\n{response.Body}");
 
                     _queue.Remove(item);
                 }
@@ -83,51 +82,32 @@ namespace BlackHole.Analytics.Transport
             }
         }
 
-        // 응답 코드로 큐에서 지울지 정한다. 0은 응답을 받지 못한 것이다.
-        public static Outcome Classify(long statusCode)
+        // 결과로 큐에서 지울지 정한다.
+        public static Outcome Classify(AnalyticsResponse response)
         {
-            if (statusCode >= 200 && statusCode < 300)
+            if (response.NetworkError)
+                return Outcome.Retry;
+
+            if (response.Ok)
                 return Outcome.Sent;
 
-            if (statusCode == 400 || statusCode == 413 || statusCode == 422)
+            long status = response.StatusCode;
+
+            if (status == 400 || status == 413 || status == 422)
                 return Outcome.Rejected;
 
             return Outcome.Retry;
         }
 
-        // 로그에 남길 응답 요약.
+        // 로그에 남길 결과 요약: "HTTP 400 INVALID_FIELD" 또는 "닿지 않음: <이유>".
         private static string Describe(AnalyticsResponse response)
         {
-            if (response.StatusCode == 0)
-                return $"응답 없음: {response.Error}";
+            if (response.NetworkError)
+                return $"닿지 않음: {response.Body}";
 
-            ErrorResponseDto error = ParseError(response.Body);
-
-            if (error == null || string.IsNullOrEmpty(error.code))
-                return response.StatusCode.ToString();
-
-            string summary = $"{response.StatusCode} {error.code}: {error.message}";
-
-            if (error.errors.Count > 0)
-                summary += " (" + string.Join(", ", error.errors.Select(field => $"{field.field}: {field.reason}")) + ")";
-
-            return summary;
-        }
-
-        private static ErrorResponseDto ParseError(string body)
-        {
-            if (string.IsNullOrEmpty(body))
-                return null;
-
-            try
-            {
-                return JsonUtility.FromJson<ErrorResponseDto>(body);
-            }
-            catch (ArgumentException)
-            {
-                // JSON이 아니다(프록시의 HTML 오류 페이지 등).
-                return null;
-            }
+            return response.ErrorCode == null
+                ? $"HTTP {response.StatusCode}"
+                : $"HTTP {response.StatusCode} {response.ErrorCode}";
         }
     }
 }

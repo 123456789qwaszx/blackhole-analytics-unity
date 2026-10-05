@@ -34,7 +34,6 @@ namespace BlackHole.Analytics.Tests
         [TestCase(400, AnalyticsSender.Outcome.Rejected)]
         [TestCase(413, AnalyticsSender.Outcome.Rejected)]
         [TestCase(422, AnalyticsSender.Outcome.Rejected)]
-        [TestCase(0, AnalyticsSender.Outcome.Retry)]
         [TestCase(401, AnalyticsSender.Outcome.Retry)]
         [TestCase(404, AnalyticsSender.Outcome.Retry)]
         [TestCase(408, AnalyticsSender.Outcome.Retry)]
@@ -43,7 +42,13 @@ namespace BlackHole.Analytics.Tests
         [TestCase(503, AnalyticsSender.Outcome.Retry)]
         public void ClassifiesStatusCode(int statusCode, AnalyticsSender.Outcome expected)
         {
-            Assert.AreEqual(expected, AnalyticsSender.Classify(statusCode));
+            Assert.AreEqual(expected, AnalyticsSender.Classify(Answer(statusCode)));
+        }
+
+        [Test]
+        public void ClassifiesNetworkErrorAsRetry()
+        {
+            Assert.AreEqual(AnalyticsSender.Outcome.Retry, AnalyticsSender.Classify(AnalyticsResponse.Network("timeout")));
         }
 
         // 처음 받은 판(201)도, 이미 받은 판(200)도 보낸 것이다.
@@ -80,20 +85,20 @@ namespace BlackHole.Analytics.Tests
             _queue.Enqueue(AnalyticsQueueTests.Stats("a"));
             var client = new FakeClient(Answer(400, JsonSamples.Load(JsonSamples.ErrorResponse)));
 
-            LogAssert.Expect(LogType.Error, new Regex("버렸다\\(400 INVALID_FIELD: .*startGrowthStage: "));
+            LogAssert.Expect(LogType.Error, new Regex("버렸다 - HTTP 400 INVALID_FIELD \\(.*\\)\n\\{"));
             RunToEnd(new AnalyticsSender(_queue, client).FlushAsync());
 
             Assert.AreEqual(0, _queue.Count);
         }
 
-        // 에러 본문이 JSON이 아니어도 버리고 코드만 남긴다.
+        // 에러 본문이 우리 형식이 아니어도 버리고, 상태 코드와 본문 원문을 남긴다.
         [Test]
         public void RejectedWithUnreadableBodyIsDropped()
         {
             _queue.Enqueue(AnalyticsQueueTests.Stats("a"));
             var client = new FakeClient(Answer(400, "<html>Bad Request</html>"));
 
-            LogAssert.Expect(LogType.Error, new Regex("버렸다\\(400\\)"));
+            LogAssert.Expect(LogType.Error, new Regex("버렸다 - HTTP 400 \\(.*\\)\n<html>"));
             RunToEnd(new AnalyticsSender(_queue, client).FlushAsync());
 
             Assert.AreEqual(0, _queue.Count);
@@ -107,28 +112,28 @@ namespace BlackHole.Analytics.Tests
             _queue.Enqueue(AnalyticsQueueTests.Stats("b"));
             var client = new FakeClient(Answer(503));
 
-            LogAssert.Expect(LogType.Warning, new Regex("큐에 두었다\\(503\\)"));
+            LogAssert.Expect(LogType.Warning, new Regex("큐에 두었다 - HTTP 503 \\("));
             RunToEnd(new AnalyticsSender(_queue, client).FlushAsync());
 
             Assert.AreEqual(1, client.Posted.Count);
             Assert.AreEqual(2, _queue.Count);
         }
 
-        // 응답이 없으면(연결 실패) 이유를 남기고 큐에 둔다.
+        // 닿지 않으면(연결 실패) 이유를 남기고 큐에 둔다.
         [Test]
         public void NoResponseKeepsItem()
         {
             _queue.Enqueue(AnalyticsQueueTests.Stats("a"));
-            var client = new FakeClient(new AnalyticsResponse(0, null, "Cannot connect to destination host"));
+            var client = new FakeClient(AnalyticsResponse.Network("Cannot connect to destination host"));
 
-            LogAssert.Expect(LogType.Warning, new Regex("응답 없음: Cannot connect"));
+            LogAssert.Expect(LogType.Warning, new Regex("큐에 두었다 - 닿지 않음: Cannot connect"));
             RunToEnd(new AnalyticsSender(_queue, client).FlushAsync());
 
             Assert.AreEqual(1, _queue.Count);
         }
 
         private static AnalyticsResponse Answer(long statusCode, string body = "") =>
-            new AnalyticsResponse(statusCode, body, null);
+            AnalyticsResponse.FromHttp(statusCode, body);
 
         // 가짜 클라이언트는 바로 답하므로 보내기도 바로 끝난다.
         private static void RunToEnd(Task task)

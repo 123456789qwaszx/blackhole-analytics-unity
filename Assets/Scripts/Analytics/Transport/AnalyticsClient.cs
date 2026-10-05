@@ -32,13 +32,14 @@ namespace BlackHole.Analytics.Transport
             request.SetRequestHeader("Content-Type", "application/json");
             await request.SendWebRequest();
 
-            // 4xx·5xx도 서버가 답한 것이다. 연결 실패·시간 초과만 응답이 없다.
-            bool answered = request.result == UnityWebRequest.Result.Success
-                || request.result == UnityWebRequest.Result.ProtocolError;
+            // 4xx·5xx도 서버가 답한 것이다. 연결 실패·시간 초과만 닿지 않은 것이다.
+            if (request.result == UnityWebRequest.Result.ConnectionError
+                || request.result == UnityWebRequest.Result.DataProcessingError)
+            {
+                return AnalyticsResponse.Network(request.error);
+            }
 
-            return answered
-                ? new AnalyticsResponse(request.responseCode, request.downloadHandler.text, null)
-                : new AnalyticsResponse(0, null, request.error);
+            return AnalyticsResponse.FromHttp(request.responseCode, request.downloadHandler.text);
         }
     }
 }
