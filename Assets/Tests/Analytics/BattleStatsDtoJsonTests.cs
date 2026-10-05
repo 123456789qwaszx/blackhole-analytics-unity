@@ -33,6 +33,13 @@ namespace BlackHole.Analytics.Tests
             StringAssert.DoesNotContain("null", json);
         }
 
+        // 새로 만들면 지금 계약 버전이다. 채우는 쪽이 빠뜨려도 0이 나가지 않는다.
+        [Test]
+        public void NewDtoHasCurrentSchemaVersion()
+        {
+            Assert.AreEqual(BattleStatsDto.CurrentSchemaVersion, new BattleStatsDto().schemaVersion);
+        }
+
         // 예시가 계약의 값 규칙을 지킨다.
         [Test]
         public void SampleFollowsContractRules()

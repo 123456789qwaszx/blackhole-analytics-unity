@@ -76,12 +76,51 @@ namespace BlackHole.Analytics.Tests
             Assert.AreEqual("2", BattleIdOf(Dequeue(queue)));
         }
 
+        // rejected/로 옮긴 통계는 다시 꺼내지 않는다.
+        [Test]
+        public void RejectedItemIsMovedAside()
+        {
+            var queue = new AnalyticsQueue(_directory, 10);
+            queue.Enqueue(Stats("a"));
+            queue.Enqueue(Stats("b"));
+
+            Assert.IsTrue(queue.TryPeek(out AnalyticsQueue.Item rejected));
+            queue.Reject(rejected);
+
+            Assert.AreEqual(1, queue.Count);
+            Assert.AreEqual("b", BattleIdOf(Dequeue(queue)));
+            Assert.IsTrue(File.Exists(Path.Combine(queue.RejectedDirectory, rejected.Name)));
+        }
+
+        // rejected/도 가득 차면 가장 오래된 것부터 버린다.
+        [Test]
+        public void OldestRejectedIsDroppedWhenFull()
+        {
+            var queue = new AnalyticsQueue(_directory, 1);
+            queue.Enqueue(Stats("1"));
+            queue.Reject(Peek(queue));
+            queue.Enqueue(Stats("2"));
+
+            LogAssert.Expect(LogType.Warning, new Regex("격리 폴더가 가득 차\\(1개\\) 가장 오래된 통계를 버렸다: .*-1\\.json"));
+            queue.Reject(Peek(queue));
+
+            string[] rejected = Directory.GetFiles(queue.RejectedDirectory);
+            Assert.AreEqual(1, rejected.Length);
+            StringAssert.EndsWith("-2.json", rejected[0]);
+        }
+
         internal static BattleStatsDto Stats(string battleId) =>
-            new BattleStatsDto { schemaVersion = BattleStatsDto.CurrentSchemaVersion, battleId = battleId };
+            new BattleStatsDto { battleId = battleId };
+
+        private static AnalyticsQueue.Item Peek(AnalyticsQueue queue)
+        {
+            Assert.IsTrue(queue.TryPeek(out AnalyticsQueue.Item item));
+            return item;
+        }
 
         private static AnalyticsQueue.Item Dequeue(AnalyticsQueue queue)
         {
-            Assert.IsTrue(queue.TryPeek(out AnalyticsQueue.Item item));
+            AnalyticsQueue.Item item = Peek(queue);
             queue.Remove(item);
             return item;
         }

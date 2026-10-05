@@ -12,7 +12,8 @@ namespace BlackHole.Analytics
         // 지금 쓰는 계약 버전. 필드를 바꾸면 올린다.
         public const int CurrentSchemaVersion = 1;
 
-        public int schemaVersion;
+        // 만들 때 지금 계약 버전으로 정해 둔다. 채우는 쪽이 빠뜨려도 0이 나가지 않는다.
+        public int schemaVersion = CurrentSchemaVersion;
         // 판 하나의 ID(UUID). 판을 시작할 때 한 번 만들고, 다시 보내도 바뀌지 않는다. 서버는 이것으로 중복을 가린다.
         public string battleId;
 
