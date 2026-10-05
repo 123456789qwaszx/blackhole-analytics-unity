@@ -1,0 +1,7 @@
+{
+  "name": "BlackHole.Analytics.Transport",
+  "rootNamespace": "BlackHole.Analytics.Transport",
+  "references": [
+    "BlackHole.Analytics"
+  ]
+}

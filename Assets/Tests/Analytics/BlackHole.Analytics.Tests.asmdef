@@ -3,6 +3,7 @@
   "rootNamespace": "BlackHole.Analytics.Tests",
   "references": [
     "BlackHole.Analytics",
+    "BlackHole.Analytics.Transport",
     "UnityEngine.TestRunner",
     "UnityEditor.TestRunner"
   ],

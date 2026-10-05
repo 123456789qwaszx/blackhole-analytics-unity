@@ -1,0 +1,7 @@
+{
+  "code": "INVALID_FIELD",
+  "message": "요청 값이 올바르지 않다.",
+  "errors": [
+    { "field": "startGrowthStage", "reason": "0 이상이어야 한다." }
+  ]
+}
