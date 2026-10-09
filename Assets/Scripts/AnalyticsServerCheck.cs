@@ -89,7 +89,7 @@ namespace BlackHole.Dev
             return new Vector2(Mathf.Clamp(window.x, 0f, maxX), Mathf.Clamp(window.y, 0f, maxY));
         }
 
-        // 계약을 지키는 판 하나. 판마다 battleId가 새로 생기고 battleIndex가 오른다.
+        // 계약(v2)을 지키는 판 하나. 판마다 battleId·seed가 새로 생기고 battleIndex가 오른다. 값은 예시 JSON과 같은 모양의 가짜다.
         private BattleSummaryDto NewSummary()
         {
             DateTime now = DateTime.UtcNow;
@@ -101,17 +101,50 @@ namespace BlackHole.Dev
                 battleIndex = ++_battleIndex,
                 buildVersion = Application.version,
                 contentVersion = "",
-                startedAtUtc = now.AddSeconds(-90).ToString("o"),
+                platform = Application.platform.ToString(),
+                startedAtUtc = now.AddSeconds(-30).ToString("o"),
                 endedAtUtc = now.ToString("o"),
-                playedSeconds = 90f,
+                playedSeconds = 28f,
+                seed = UnityEngine.Random.Range(int.MinValue, int.MaxValue),
                 startGrowthStage = 1,
-                nodes = { new NodeRankDto { nodeId = "timer-01", rank = 1 } },
+                nodes =
+                {
+                    new NodeRankDto { nodeId = "timer-01", rank = 1 },
+                    new NodeRankDto { nodeId = "growth.time-01", rank = 1 },
+                },
+                appliedStats =
+                {
+                    startLevel = 10,
+                    startExp = 250000,
+                    goalLevel = 20,
+                    goalExp = 18000000,
+                    timeLimitSeconds = 14f,
+                    growthTimeSeconds = 3f,
+                    breakerDamage = 1f,
+                    breakerInterval = 1f,
+                    breakerRadius = 0.26f,
+                    breakerCritChance = 0f,
+                    breakerCritDamage = 1f,
+                    traitChances =
+                    {
+                        new TraitChanceDto { enemyId = "asteroid", traitId = "golden", chance = 0f },
+                        new TraitChanceDto { enemyId = "asteroid", traitId = "electric", chance = 0f },
+                    },
+                    goldenAsteroidMultiplier = 50f,
+                },
                 kills = { new EnemyKillDto { enemyId = "asteroid", count = 10 } },
                 totalKills = 10,
                 earnedGold = 100,
                 settledGold = 100,
-                reachedLevel = 3,
+                reachedLevel = 12,
+                exp = 340000,
                 reachedMilestone = false,
+                stats =
+                {
+                    breakerDamage = 120.5,
+                    breakerTicks = 28,
+                    addedSeconds = 14f,
+                },
             };
         }
 
