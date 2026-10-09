@@ -1,28 +1,67 @@
 {
-  "schemaVersion": 1,
+  "schemaVersion": 2,
   "battleId": "3f2b8c1e-9a4d-4e6f-8b7a-1c2d3e4f5a6b",
   "installId": "9c1e4b2a-7d3f-4a8e-b5c6-2f1d0e9a8b7c",
   "battleIndex": 27,
   "buildVersion": "1.0",
   "contentVersion": "",
+  "platform": "Android",
   "startedAtUtc": "2026-10-05T03:00:00.0000000Z",
-  "endedAtUtc": "2026-10-05T03:02:30.0000000Z",
-  "playedSeconds": 92.5,
-  "startGrowthStage": 3,
+  "endedAtUtc": "2026-10-05T03:00:31.5000000Z",
+  "playedSeconds": 28.0,
+  "seed": 1830442981,
+  "startGrowthStage": 1,
   "nodes": [
     { "nodeId": "timer-01", "rank": 1 },
     { "nodeId": "growth.time-01", "rank": 1 },
-    { "nodeId": "electricAsteroid.spawnChance-01", "rank": 1 },
-    { "nodeId": "star.size-03", "rank": 3 }
+    { "nodeId": "breaker.damage-01", "rank": 1 },
+    { "nodeId": "breaker.speed-12", "rank": 3 },
+    { "nodeId": "goldenAsteroid.spawnChance-01", "rank": 1 }
   ],
+  "appliedStats": {
+    "startLevel": 10,
+    "startExp": 250000,
+    "goalLevel": 20,
+    "goalExp": 18000000,
+    "timeLimitSeconds": 14.0,
+    "growthTimeSeconds": 3.0,
+    "breakerDamage": 2.0,
+    "breakerInterval": 0.75,
+    "breakerRadius": 0.375,
+    "breakerCritChance": 0.25,
+    "breakerCritDamage": 1.5,
+    "traitChances": [
+      { "enemyId": "asteroid", "traitId": "golden", "chance": 0.125 },
+      { "enemyId": "asteroid", "traitId": "electric", "chance": 0.0 },
+      { "enemyId": "planet", "traitId": "moon", "chance": 0.0 },
+      { "enemyId": "star", "traitId": "electric", "chance": 0.0 },
+      { "enemyId": "star", "traitId": "laser", "chance": 0.0 },
+      { "enemyId": "star", "traitId": "supernova", "chance": 0.0 }
+    ],
+    "goldenAsteroidMultiplier": 50.0
+  },
   "kills": [
-    { "enemyId": "asteroid", "count": 128 },
-    { "enemyId": "comet", "count": 17 },
-    { "enemyId": "planet", "count": 4 }
+    { "enemyId": "asteroid", "count": 412 },
+    { "enemyId": "planet", "count": 4 },
+    { "enemyId": "comet", "count": 3 }
   ],
-  "totalKills": 149,
-  "earnedGold": 1840,
-  "settledGold": 1840,
-  "reachedLevel": 12,
-  "reachedMilestone": false
+  "totalKills": 419,
+  "earnedGold": 1214870,
+  "settledGold": 1214870,
+  "reachedLevel": 14,
+  "exp": 512340,
+  "reachedMilestone": false,
+  "stats": {
+    "breakerDamage": 1843.5,
+    "breakerCriticalDamage": 512.5,
+    "breakerTicks": 37,
+    "electricAsteroidDamage": 0.0,
+    "electricStarDamage": 0.0,
+    "laserDamage": 0.0,
+    "supernovaDamage": 0.0,
+    "goldenAsteroidGold": 30250,
+    "collectedMoons": 0,
+    "collectedComets": 3,
+    "addedSeconds": 14.0
+  }
 }
