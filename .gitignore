@@ -140,3 +140,8 @@ $RECYCLE.BIN/
 
 # Cowork(Claude)가 미리보기 이미지를 저장하는 폴더
 /Claude outputs/
+
+# Integration experiments: credentials, notes, generated drafts
+/LabData/
+**/bin/
+**/obj/
